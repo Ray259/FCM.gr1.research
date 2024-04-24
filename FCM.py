@@ -9,11 +9,13 @@ class FCM:
         self.Y = data
         self.u = np.zeros((self.c, self.Y.shape[0]))
         self.centers = np.zeros((self.c, self.Y.shape[1]))
-
+        self.members = np.zeros((self.Y.shape[0]))  # points belong to which cluster
+        self.cuslter_members = np.zeros(self.c) # clusters's number of members
+        
     def cal_centers(self):
         n_points, n_features = self.Y.shape   
         n_clusters = self.c
-        centers = np.zeros((self.c, n_features))
+        centers = np.zeros((n_clusters, n_features))
 
         for i in range(n_clusters):
             for j in range(n_features):
@@ -35,11 +37,19 @@ class FCM:
             for k in range(n_points):
                 d = 0
                 d_ik = np.linalg.norm(self.Y[k] - centers[i]) 
-                for j in range(n_clusters):  # Adjusted for multiple clusters      
+                for j in range(n_clusters):  
                     d_jk = np.linalg.norm(self.Y[k] - centers[j])  
                     d += (d_ik / d_jk) ** (2 / (self.m - 1))
                 updated_u[i, k] = d ** -1
         return updated_u
+        
+    def update_cluster_members(self):
+        n_points, n_features = self.Y.shape
+        u = self.u
+        for k in range(n_points):
+            t_cluster = int(np.argmax(u[:,k]))
+            self.members[k] = t_cluster
+            self.cuslter_members[t_cluster] += 1            
         
     def loop(self):
         n_points, n_features = self.Y.shape
@@ -50,8 +60,9 @@ class FCM:
             print(l, "/", self.lmax)
             centers = self.cal_centers()
             updated_u = self.update_membership(centers)
-            print(updated_u)
+            # print(updated_u)
             if np.linalg.norm(updated_u - self.u) < self.eps:
                 break
             self.u = updated_u
+        self.data_center = np.mean(self.Y, axis=0)
         return updated_u
