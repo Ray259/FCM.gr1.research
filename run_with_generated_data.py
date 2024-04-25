@@ -32,6 +32,7 @@ def main():
         o = FCM(data=st.session_state['generated_data']['Y'], clusters=clusters, m=m, eps=eps, lmax=lmax)
         if st.button('Run Algorithm'):
             updated_u = o.loop()
+            o.update_cluster_members()
             st.write('Final Membership:')
             st.write(updated_u)
 
@@ -42,16 +43,24 @@ def main():
             ax.set_xlabel('Feature 1')
             ax.set_ylabel('Feature 2')
             ax.set_title('FCM Clustering')
-            ax.legend(['Cluster Centers'], loc='upper right')
+            ax.legend(['Data points','Cluster Centers'], loc='upper right')
             st.pyplot(fig)
             
-            # Criteria
-            o.update_cluster_members()
-            cr = Criteria(o.centers, o.cluster_members, o.members, o.Y.shape[0], clusters, o.data_center, o.Y)
-            vrc = cr.VRC()
-            st.write('VRC:', vrc)
-            dbi = cr.DBI()
-            st.write('DBI:', dbi)
+            # Validity            
+            cr = Criteria(o.centers, o.cluster_members, o.members, o.Y.shape[0], clusters, o.data_center, o.Y, o.u, o.m)
+            crt = cr.validate()
+            for c in crt:
+                st.write(c[0] + ':', c[1])
 
 if __name__ == '__main__':
     main()
+
+css = '''
+<style>
+    [data-testid="stSidebar"]{
+        min-width: 500px;
+        max-width: 800px;
+    }
+</style>
+'''
+st.markdown(css, unsafe_allow_html=True)

@@ -50,7 +50,8 @@ class FCM:
             t_cluster = int(np.argmax(u[:,k]))
             self.members[k] = t_cluster
             self.cluster_members[t_cluster] += 1            
-        
+            
+
     def loop(self):
         n_points, n_features = self.Y.shape
         n_clusters = self.c
@@ -64,5 +65,6 @@ class FCM:
             if np.linalg.norm(updated_u - self.u) < self.eps:
                 break
             self.u = updated_u
+        print("Complete")
         self.data_center = np.mean(self.Y, axis=0)
         return updated_u
