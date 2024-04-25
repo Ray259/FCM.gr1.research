@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from FCM import FCM
-from criteria import *
+from criteria import Criteria
 
 def main():
     st.title('FCM Algorithm Demo')
@@ -44,8 +44,11 @@ def main():
         
         # Criteria
         o.update_cluster_members()
-        vrc = VRC(o.centers, o.cluster_members, o.members, o.Y.shape[0], clusters, o.data_center, o.Y)
+        cr = Criteria(o.centers, o.cluster_members, o.members, o.Y.shape[0], clusters, o.data_center, o.Y)
+        vrc = Criteria.VRC
         st.write('VRC:', vrc)
+        dbi = Criteria.DBI
+        st.write('DBI:', dbi)
 
 if __name__ == '__main__':
     main()
