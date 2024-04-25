@@ -10,7 +10,7 @@ class FCM:
         self.u = np.zeros((self.c, self.Y.shape[0]))
         self.centers = np.zeros((self.c, self.Y.shape[1]))
         self.members = np.zeros((self.Y.shape[0]))  # points belong to which cluster
-        self.cuslter_members = np.zeros(self.c) # clusters's number of members
+        self.cluster_members = np.zeros(self.c) # clusters's number of members
         
     def cal_centers(self):
         n_points, n_features = self.Y.shape   
@@ -49,7 +49,7 @@ class FCM:
         for k in range(n_points):
             t_cluster = int(np.argmax(u[:,k]))
             self.members[k] = t_cluster
-            self.cuslter_members[t_cluster] += 1            
+            self.cluster_members[t_cluster] += 1            
         
     def loop(self):
         n_points, n_features = self.Y.shape
