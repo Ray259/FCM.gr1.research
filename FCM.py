@@ -11,7 +11,7 @@ class FCM:
         self.centers = np.zeros((self.c, self.Y.shape[1]))
         self.members = np.zeros((self.Y.shape[0]))  # points belong to which cluster
         self.cluster_members = np.zeros(self.c) # clusters's number of members
-        
+
     def cal_centers(self):
         n_points, n_features = self.Y.shape   
         n_clusters = self.c
@@ -28,7 +28,7 @@ class FCM:
                 centers[i, j] = u_k_m_yk_sum / u_k_m_sum               
         self.centers = centers        
         return centers
-    
+
     def update_membership(self, centers):
         n_points, n_features = self.Y.shape         
         n_clusters = self.c
@@ -50,7 +50,6 @@ class FCM:
             t_cluster = int(np.argmax(u[:,k]))
             self.members[k] = t_cluster
             self.cluster_members[t_cluster] += 1            
-            
 
     def loop(self):
         n_points, n_features = self.Y.shape
@@ -61,10 +60,32 @@ class FCM:
             print(l, "/", self.lmax)
             centers = self.cal_centers()
             updated_u = self.update_membership(centers)
-            # print(updated_u)
             if np.linalg.norm(updated_u - self.u) < self.eps:
                 break
             self.u = updated_u
         print("Complete")
         self.data_center = np.mean(self.Y, axis=0)
+        return updated_u
+
+class sSFCM(FCM):
+    def __init__(self, data, supervised_membership, clusters=2, m=2, eps=0.01, lmax=50, alpha=0.5):
+        super().__init__(data, clusters, m, eps, lmax)
+        self.u_supervised = supervised_membership
+        self.alpha = alpha
+
+    def update_membership(self, centers):
+        updated_u = super().update_membership(centers)
+        updated_u = (1 - self.alpha) * updated_u + self.alpha * self.u_supervised
+        return updated_u
+
+class eSFCM(sSFCM):
+    def __init__(self, data, supervised_membership, clusters=2, m=2, eps=0.01, lmax=50, alpha=0.5, beta=1.0):
+        super().__init__(data, supervised_membership, clusters, m, eps, lmax, alpha)
+        self.beta = beta
+
+    def update_membership(self, centers):
+        updated_u = super().update_membership(centers)
+        entropy_term = -np.sum(updated_u * np.log(updated_u + 1e-10), axis=0)
+        updated_u += self.beta * entropy_term
+        updated_u = updated_u / np.sum(updated_u, axis=0)
         return updated_u
