@@ -9,6 +9,7 @@ class FCM:
         self.Y = data
         self.u = np.zeros((self.c, self.Y.shape[0]))
         self.centers = np.zeros((self.c, self.Y.shape[1]))
+        self.data_center = np.zeros(self.Y.shape[1])
         self.members = np.zeros((self.Y.shape[0]))  # points belong to which cluster
         self.cluster_members = np.zeros(self.c) # clusters's number of members
         
